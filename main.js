@@ -1,32 +1,33 @@
-const { app, BrowserWindow, ipcMain } = require('electron/main')
-const path = require('node:path')
+const { app, BrowserWindow } = require('electron');
+const { spawn } = require('child_process');
+let pyServer;
 
-const createWindow = () => {
+function createWindow() {
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
-  })
+    width: 1000,
+    height: 700,
+    webPreferences: { nodeIntegration: false }
+  });
 
-  win.loadFile('index.html')
+  // Start the Voila server
+  pyServer = spawn('python', ['-m', 'voila', 'Real-Time_370_Final_Code_053125.ipynb', '--port=8866', '--no-browser']);
+
+  pyServer.stdout.on('data', (data) => {
+    console.log(`[Voila]: ${data}`);
+  });
+
+  pyServer.stderr.on('data', (data) => {
+    console.error(`[Voila Error]: ${data}`);
+  });
+
+  // Wait a bit for Voila to start, then open it
+  setTimeout(() => {
+    win.loadURL('http://localhost:8866');
+  }, 4000); // Wait 4s for server startup
+
+  win.on('closed', () => {
+    if (pyServer) pyServer.kill();
+  });
 }
 
-app.whenReady().then(() => {
-    
-    ipcMain.handle('ping', () => 'pong')
-  createWindow()
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
-    }
-  })
-})
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
+app.whenReady().then(createWindow);
