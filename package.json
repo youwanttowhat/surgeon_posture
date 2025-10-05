@@ -1,0 +1,15 @@
+{
+  "name": "posture_software",
+  "version": "1.0.0",
+  "description": "imu_thing",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "author": "adam",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^38.2.1"
+  }
+}
